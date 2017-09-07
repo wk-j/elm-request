@@ -35,9 +35,7 @@ init =
     )
 
 
-
 -- UPDATE
-
 
 type Msg
     = GetPoster
@@ -91,7 +89,6 @@ view model =
         , h1 [] [ text model.title ]
         , img [ src model.posterUrl ] []
         ]
-
 
 
 -- SUBSCRIPTIONS
