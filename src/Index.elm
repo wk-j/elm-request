@@ -2,7 +2,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode as Json exposing (string, list, int, map4, field)
+import Debug
+import Json.Encode as Encode 
+import Json.Decode as Json exposing (string, list, int, map4, map, field)
 
 main : Program Never Model Msg
 main =
@@ -17,9 +19,10 @@ main =
 
 type alias License = 
   { id: Int
-  , productName: String 
-  , companyName: String
-  , licenseKey: String }
+  --, productName: String 
+  --, companyName: String
+  --, licenseKey: String 
+  }
 
 type alias Model = 
   { licenses : List License 
@@ -28,7 +31,8 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init = 
-  Model [] (License 0 "" "" "")
+  --{ licenses = [ ], currentLicense = License 0 "" "" "" }
+  { licenses = [ ], currentLicense = License 0 }
   ! [getAllLicenses]
 
 -- SUBSCRIPTIONS
@@ -55,7 +59,9 @@ update msg model =
       model
       ! [updateLicense license]
     UpdateLicenseResult (Ok _)  ->
-      ({ model | currentLicense = License 0 "" "" "" }, Cmd.none)
+      --({ model | currentLicense = License 0 "" "" "" }, Cmd.none)
+     { model | currentLicense = License 0 }
+     ! [getAllLicenses]
     UpdateLicenseResult (Err _) ->
       (model, Cmd.none)
     GetAllLicensesResult (Ok licenses) ->
@@ -68,7 +74,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ placeholder "enter a movie title" , value (model.licenses |> List.length |> toString) , autofocus True ]
+        [ input [value (model.licenses |> List.length |> toString)]
             []
         , button [class "ui small blue button", onClick <| UpdateLicenseRequest (model.currentLicense)]
             [text "New"]
@@ -85,7 +91,7 @@ updateLicense license =
         { method = "POST"
         , headers = [(Http.header "Content-Type" "application/json")]
         , url = url
-        , body = Http.emptyBody
+        , body = encodeLicense license |> Http.jsonBody
         , expect = Http.expectJson decodeLicense 
         , timeout = Nothing
         , withCredentials = False
@@ -99,14 +105,18 @@ getAllLicenses =
     Http.send GetAllLicensesResult 
      (Http.get url decodeLicenses)
 
+encodeLicense : License -> Encode.Value
+encodeLicense license =
+  [("id", Encode.int license.id)]
+  |> Encode.object
 
 decodeLicense : Json.Decoder License
 decodeLicense = 
-  map4 License
+  Json.map License
     (field "id" int)
-    (field "licenseKey" string)
-    (field "productName" string)
-    (field "companyName" string)
+    --(field "licenseKey" string)
+    --(field "productName" string)
+    --(field "companyName" string)
 
 decodeLicenses : Json.Decoder  (List License)
 decodeLicenses =
