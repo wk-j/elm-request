@@ -1,0 +1,18 @@
+### get all license
+
+GET http://localhost:20000/api/license/getAllLicenses?token=5b91d36c-f26c-4d15-aeab-5e56f0df15e6 
+
+### update license
+
+POST http://localhost:20000/api/license/updateLicense?token=5b91d36c-f26c-4d15-aeab-5e56f0df15e6 
+Content-Type: application/json
+
+{
+    "available": 2,
+    "productName": "Product A",
+    "companyName": "Company A",
+    "properties": {
+        "key1" : "value1",
+        "key2" : "value2"
+    }
+}

@@ -1,0 +1,18 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.css">
+	</head>
+	<body>
+
+		<script src="index.js"></script>
+
+		<div id="container"/>
+
+		<script>
+			let container = document.getElementById('container')
+			// start the elm app in the container
+			// and keep a reference for communicating with the app
+			let feldspar = Elm.Main.embed(container)
+		</script>
+	</body>
+</html>
