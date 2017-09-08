@@ -22,11 +22,12 @@ type alias Model =
   , registrations: List Registration
   , currentLicense : License
   , tab : Tab
+  , keyValue: KeyValue
   }
 
 init : (Model, Cmd Msg)
 init = 
-  { licenses = [ ], currentLicense = emptyLicense, tab = LicenseTab, registrations = [] }
+  { licenses = [ ], currentLicense = emptyLicense, tab = LicenseTab, registrations = [], keyValue = { key = "", value = ""} }
   -- { licenses = [ ], currentLicense = License 0 }
   ! [getAllLicenses]
 
@@ -40,8 +41,14 @@ subscriptions model =
 
 emptyLicense : License
 emptyLicense = 
-  License 0 "" "" "" 2 "2016/10/10" "2018/10/10" (Dict.fromList [("P1", ""), ("P2", "")])
-  -- { id = 0, companyName = "", productName = "", available = 0, validFrom = "2016/10/10", goodThrough = "2018/10/10" }
+  { id = 0
+  , companyName = ""
+  , productName = ""
+  , licenseKey = ""
+  , available = 2
+  , properties = Dict.empty
+  , validFrom = "2016-10-10"
+  , goodThrough = "2018-10-10" }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
@@ -58,7 +65,7 @@ update msg model =
       ! [updateLicense license]
 
     UpdateLicenseResult (Ok _)  ->
-      { model | currentLicense = emptyLicense }
+      { model | currentLicense = emptyLicense, keyValue = { key = "", value = "" } }
      ! [getAllLicenses]
 
     UpdateLicenseResult (Err _) ->
@@ -150,12 +157,36 @@ update msg model =
       { model | currentLicense = license }
       ! [Cmd.none]
 
-    EditPropertyValue key value ->
+    EditPropertyValue value ->
+      let
+        keyValue = model.keyValue
+        newKeyValue = { keyValue | value = value }
+      in
+        { model | keyValue = newKeyValue }
+        ! [Cmd.none]
+
+    EditPropertyKey key ->
+      let
+        keyValue = model.keyValue
+        newKeyValue = { keyValue | key = key }
+      in
+        { model | keyValue = newKeyValue }
+        ! [Cmd.none]
+
+    RemoveProperty key ->
       let
         current = model.currentLicense
-        property = current.properties
-        newProperty = Dict.insert key value property
-        newCurrent = { current | properties = newProperty }
+        props = current.properties  |> Dict.remove key
+        newCurrent = { current | properties = props }
+      in
+        { model | currentLicense = newCurrent }
+        ! [Cmd.none]
+
+    AddProperty key value ->
+      let
+        current = model.currentLicense
+        props = current.properties  |> Dict.insert key value
+        newCurrent = { current | properties = props }
       in
         { model | currentLicense = newCurrent }
         ! [Cmd.none]
@@ -171,27 +202,45 @@ disable license =
     license.companyName /= "" 
     && license.productName /= "" then
       ""
-  else
-    "disabled"
+  else "disabled"
+
+myKeyValue : KeyValue -> Html Msg
+myKeyValue keyValue = 
+  div [ class "inline fields" ]
+      [ div [ class "three wide field" ]
+        [ label [] [ text "" ]
+        , input [ type_ "text", placeholder "Key", value keyValue.key, onInput EditPropertyKey]
+          []
+        ]
+      , div [ class "three wide field" ]
+        [ input [ type_ "text", placeholder "Value", value keyValue.value, onInput EditPropertyValue]
+          []
+        ]
+      , div [ class "two wide field" ]
+         [ button [class "ui tiny blue button", onClick (AddProperty keyValue.key keyValue.value)] [text "Add Property"] ]
+      ]
+
 
 myProperty : ( String, String ) -> Html Msg
 myProperty (key, v) = 
   div [ class "inline fields" ]
       [ div [ class "three wide field" ]
-        [ label [] [ text "Property" ]
-        , input [ type_ "text", placeholder "Key", value key]
+        [ label [] [ text "" ]
+        , input [ type_ "text", placeholder "Key", value key, readonly True]
           []
         ]
       , div [ class "three wide field" ]
-        [ input [ type_ "text", placeholder "Value", value v, onInput (EditPropertyValue key)]
+        [ input [ type_ "text", placeholder "Value", value v, readonly True]
           []
         ]
+      , div [ class "two wide field" ]
+         [ button [class "ui tiny red button" , onClick (RemoveProperty key)] [text "-"] ]
       ]
 
 myProperties:  (Dict.Dict String String) -> Html Msg
 myProperties properties = 
   if Dict.size properties > 0 then
-    div [ class "ui mini form segment" ]
+    div [ class "ui small form" ]
       ( 
         properties 
         |> Dict.toList
@@ -213,18 +262,18 @@ myForm model =
         ]
       , div [ class "field" ]
         [ label [] [ text "Valid From" ]
-        , input [ type_ "date" , value "2016-10-10" ] []
+        , input [ type_ "date" , value model.currentLicense.validFrom ] []
         ]
       , div [ class "field" ]
         [ label [] [ text "Good Through" ]
-        , input [ type_ "date" , value "2018-10-10" ] []
+        , input [ type_ "date" , value model.currentLicense.goodThrough ] []
         ]
       , div [ class "field" ]
         [ label [] [ text "Available"]
         , input [ type_ "number", value <| toString model.currentLicense.available, onInput EditAvailable] []
         ]
       ]
-    , myProperties model.currentLicense.properties
+    , div [class "ui segment"] [ myKeyValue model.keyValue , myProperties model.currentLicense.properties ]
     , div [ class ("ui blue submit button " ++ disable model.currentLicense),  onClick <| UpdateLicenseRequest (model.currentLicense) ]
       [ text "Create" ]
     ]
@@ -283,7 +332,6 @@ myRegRow license =
             [text "Deregister"]
          ]
     ]
-
 
 myRegTable : List Registration -> Html Msg
 myRegTable regs = 

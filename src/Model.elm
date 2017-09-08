@@ -23,7 +23,10 @@ type Msg
   | EditGoodThrough String
   | ChangeTab (Tab)
   | SelectLicense License
-  | EditPropertyValue String String
+  | EditPropertyKey String
+  | EditPropertyValue String
+  | RemoveProperty String
+  | AddProperty String String
 
 type alias Registration = 
   { id: Int
@@ -32,6 +35,11 @@ type alias Registration =
   , licenseKey: String
   , machineKey: String
   , goodThrough: String }
+
+
+type alias KeyValue = 
+  { key: String
+  , value: String }
 
 type alias License = 
   { id: Int
