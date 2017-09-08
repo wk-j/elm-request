@@ -26,6 +26,23 @@ deleteLicense license =
         , withCredentials = False
          })
 
+deregister : Registration -> Cmd Msg
+deregister license =
+  let 
+    url = host ++ "/api/license/deregister?token=5b91d36c-f26c-4d15-aeab-5e56f0df15e6"
+  in
+    Http.send  
+      DeregisterResult 
+      (Http.request 
+        { method = "POST"
+        , headers = [(Http.header "Content-Type" "application/json")]
+        , url = url
+        , body = encodeDeregister license |> Http.jsonBody
+        , expect = Http.expectString
+        , timeout = Nothing
+        , withCredentials = False
+         })
+
 updateLicense : License -> Cmd Msg
 updateLicense license =
   let 
@@ -67,6 +84,13 @@ encodeLicense license =
   , ("available", Encode.int license.available)
   , ("validFrom", Encode.string license.validFrom)
   , ("goodThrough", Encode.string license.goodThrough)
+  ]
+  |> Encode.object
+
+encodeDeregister : Registration -> Encode.Value
+encodeDeregister license = 
+  [ ("licenseKey", Encode.string license.licenseKey)
+  , ("machineKey", Encode.string license.machineKey)
   ]
   |> Encode.object
 

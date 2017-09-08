@@ -83,6 +83,18 @@ update msg model =
       model
       ! [Cmd.none]
 
+    DeregisterRequest reg -> 
+      model
+      ! [deregister reg]
+
+    DeregisterResult (Ok msg) ->
+      model
+      ! [getRegistrationStatus]
+    
+    DeregisterResult (Err msg) ->
+      model
+      ! [Cmd.none]
+
     GetRegistrationStatusRequest ->
       model
       ! [getRegistrationStatus]
@@ -173,7 +185,7 @@ myForm model =
         , input [ type_ "number", value <| toString model.currentLicense.available, onInput EditAvailable] []
         ]
       ]
-    , div [ class ("ui green submit button " ++ disable model.currentLicense),  onClick <| UpdateLicenseRequest (model.currentLicense) ]
+    , div [ class ("ui blue submit button " ++ disable model.currentLicense),  onClick <| UpdateLicenseRequest (model.currentLicense) ]
       [ text "Create" ]
     ]
 
@@ -212,6 +224,10 @@ myTable licenses =
       (licenses |> List.map myRow)
     ]
 
+disableDeregis : Registration -> String
+disableDeregis license =
+  if license.machineKey == "-" then "disabled"
+  else ""
 
 myRegRow : Registration -> Html Msg
 myRegRow license =
@@ -220,9 +236,14 @@ myRegRow license =
     , td [] [ text license.productName ]
     , td [] [ text license.companyName ]
     , td [] [ text license.licenseKey ]
-    , td [] [ text license.machingKey ]
+    , td [] [ text license.machineKey ]
     , td [] [ text license.goodThrough ]
+    , td [] 
+         [ button [class ("ui small red button " ++ disableDeregis license), onClick <| DeregisterRequest (license) ] 
+            [text "Deregister"]
+         ]
     ]
+
 
 myRegTable : List Registration -> Html Msg
 myRegTable regs = 
@@ -235,6 +256,7 @@ myRegTable regs =
         , th [] [ text "License Key" ]
         , th [] [ text "Machine Key" ]
         , th [] [ text "Good Through" ]
+        , th [] [ ]
         ]
       ]
     , tbody []

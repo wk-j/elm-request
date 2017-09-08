@@ -13,6 +13,8 @@ type Msg
   | DeleteLicenseResult (Result Http.Error String)
   | GetRegistrationStatusRequest
   | GetRegistrationStatusResult (Result Http.Error (List Registration))
+  | DeregisterRequest (Registration)
+  | DeregisterResult (Result Http.Error String)
   | EditCompanyName String
   | EditProductName String
   | EditAvailable String
@@ -25,7 +27,7 @@ type alias Registration =
   , productName: String
   , companyName: String
   , licenseKey: String
-  , machingKey: String
+  , machineKey: String
   , goodThrough: String }
 
 type alias License = 

@@ -16,3 +16,13 @@ Content-Type: application/json
         "key2" : "value2"
     }
 }
+
+### register
+
+POST http://192.168.0.20/api/license/register
+Content-Type: application/json
+
+{
+    "machineKey": "!!!!!!!!!!!!!!!!!!!!!!!!",
+    "licenseKey": "0a69e778-db6c-44f6-9160-0733185a5b97"
+}
