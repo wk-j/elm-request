@@ -46,11 +46,14 @@ encodeLicense license =
 
 decodeLicense : Json.Decoder License
 decodeLicense = 
-  Json.map License
+  Json.map7 License
     (field "id" int)
-    --(field "licenseKey" string)
-    --(field "productName" string)
-    --(field "companyName" string)
+    (field "productName" string)
+    (field "companyName" string)
+    (field "licenseKey" string)
+    (field "available" int)
+    (field "validFrom" string)
+    (field "goodThrough" string)
 
 decodeLicenses : Json.Decoder  (List License)
 decodeLicenses =
