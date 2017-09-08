@@ -200,7 +200,7 @@ myRow license =
     , td [] [ text license.validFrom ]
     , td [] [ text license.goodThrough ]
     , td [] 
-         [ button [class "ui small red button", onClick <| DeleteLicenseRequest (license) ] 
+         [ button [class "ui tiny red button", onClick <| DeleteLicenseRequest (license) ] 
            [text "Delete"]
          ]
     ]
@@ -239,7 +239,7 @@ myRegRow license =
     , td [] [ text license.machineKey ]
     , td [] [ text license.goodThrough ]
     , td [] 
-         [ button [class ("ui small red button " ++ disableDeregis license), onClick <| DeregisterRequest (license) ] 
+         [ button [class ("ui tiny red button " ++ disableDeregis license), onClick <| DeregisterRequest (license) ] 
             [text "Deregister"]
          ]
     ]
@@ -270,7 +270,7 @@ tab tab =
       if tab == t then "item active"
       else "item"
   in
-    div [ class "ui pointing menu" ]
+    div [ class "ui pointing menu blue" ]
       [ a [ class (active LicenseTab) , onClick (ChangeTab LicenseTab)] [ text "License"]
       , a [ class (active RegistrationTab) , onClick (ChangeTab RegistrationTab) ] [ text "Registration" ]
       ]
