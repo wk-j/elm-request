@@ -43,6 +43,14 @@ updateLicense license =
         , withCredentials = False
          })
 
+getRegistrationStatus : Cmd Msg
+getRegistrationStatus = 
+  let
+    url = host ++ "/api/license/getRegistrationStatus?token=5b91d36c-f26c-4d15-aeab-5e56f0df15e6"
+  in
+    Http.send GetRegistrationStatusResult
+      (Http.get url decodeRegs)
+
 getAllLicenses : Cmd Msg
 getAllLicenses = 
   let 
@@ -76,3 +84,18 @@ decodeLicense =
 decodeLicenses : Json.Decoder  (List License)
 decodeLicenses =
   Json.list decodeLicense
+
+decodeReg : Json.Decoder Registration
+decodeReg = 
+  Json.map6 Registration
+    (field "id" int)
+    (field "productName" string)
+    (field "companyName" string)
+    (field "licenseKey" string)
+    (field "machineKey" string)
+    (field "goodThrough" string)
+
+decodeRegs : Json.Decoder  (List Registration)
+decodeRegs =
+  Json.list decodeReg
+

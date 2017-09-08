@@ -16,14 +16,17 @@ main =
 
 -- MODEL
 
+
 type alias Model = 
   { licenses : List License 
+  , registrations: List Registration
   , currentLicense : License
+  , tab : Tab
   }
 
 init : (Model, Cmd Msg)
 init = 
-  { licenses = [ ], currentLicense = emptyLicense }
+  { licenses = [ ], currentLicense = emptyLicense, tab = LicenseTab, registrations = [] }
   -- { licenses = [ ], currentLicense = License 0 }
   ! [getAllLicenses]
 
@@ -80,6 +83,26 @@ update msg model =
       model
       ! [Cmd.none]
 
+    GetRegistrationStatusRequest ->
+      model
+      ! [getRegistrationStatus]
+
+    GetRegistrationStatusResult (Ok status) ->
+      { model | registrations = status }
+      ! [Cmd.none]
+
+    GetRegistrationStatusResult (Err msg) ->
+      model
+      ! [Cmd.none]
+
+    ChangeTab tab ->
+      { model | tab = tab}
+      ! case tab of
+          RegistrationTab ->
+            [getRegistrationStatus]
+          LicenseTab ->
+            [getAllLicenses]
+
     EditProductName product ->
       let current = model.currentLicense
           new = { current | productName = product }
@@ -115,6 +138,16 @@ toInt : String -> Int
 toInt input  =
   String.toInt input |> Result.toMaybe |> Maybe.withDefault 0
 
+
+disable : License -> String
+disable license = 
+  if 
+    license.companyName /= "" 
+    && license.productName /= "" then
+      ""
+  else
+    "disabled"
+
 myForm : { a | currentLicense : License } -> Html Msg
 myForm model =
   div [ class "ui small form segment" ]
@@ -140,7 +173,7 @@ myForm model =
         , input [ type_ "number", value <| toString model.currentLicense.available, onInput EditAvailable] []
         ]
       ]
-    , div [ class "ui green submit button",  onClick <| UpdateLicenseRequest (model.currentLicense) ]
+    , div [ class ("ui green submit button " ++ disable model.currentLicense),  onClick <| UpdateLicenseRequest (model.currentLicense) ]
       [ text "Create" ]
     ]
 
@@ -162,10 +195,10 @@ myRow license =
 
 myTable : List License -> Html Msg
 myTable licenses = 
-  table [ class "ui single line table" ]
+  table [ class "ui orange single line table" ]
     [ thead []
       [ tr []
-        [ th [] [ text "Id" ]
+        [ th [] [ text "#" ]
         , th [] [ text "Product Name" ]
         , th [] [ text "Company Name" ]
         , th [] [ text "License Key" ]
@@ -180,11 +213,69 @@ myTable licenses =
     ]
 
 
+myRegRow : Registration -> Html Msg
+myRegRow license =
+    tr []
+    [ td [] [ text (toString license.id) ]
+    , td [] [ text license.productName ]
+    , td [] [ text license.companyName ]
+    , td [] [ text license.licenseKey ]
+    , td [] [ text license.machingKey ]
+    , td [] [ text license.goodThrough ]
+    ]
+
+myRegTable : List Registration -> Html Msg
+myRegTable regs = 
+  table [ class "ui orange single line table" ]
+    [ thead []
+      [ tr []
+        [ th [] [ text "#" ]
+        , th [] [ text "Product Name" ]
+        , th [] [ text "Company Name" ]
+        , th [] [ text "License Key" ]
+        , th [] [ text "Machine Key" ]
+        , th [] [ text "Good Through" ]
+        ]
+      ]
+    , tbody []
+      (regs |> List.map myRegRow)
+    ]
+
+tab : Tab -> Html Msg
+tab tab = 
+  let 
+    active t =  
+      if tab == t then "item active"
+      else "item"
+  in
+    div [ class "ui pointing menu" ]
+      [ a [ class (active LicenseTab) , onClick (ChangeTab LicenseTab)] [ text "License"]
+      , a [ class (active RegistrationTab) , onClick (ChangeTab RegistrationTab) ] [ text "Registration" ]
+      ]
+
 -- VIEW
+licenseTab : Model -> Html Msg
+licenseTab model = 
+  if model.tab == LicenseTab then
+    div []
+      [ myForm model
+      , myTable (model.licenses)
+      ]
+  else
+    div [] []
+
+regTab : Model -> Html Msg
+regTab model = 
+  if model.tab == RegistrationTab then
+    div []
+      [ myRegTable (model.registrations) ]
+  else
+    div [] []
 
 view : Model -> Html Msg
 view model =
     div [ class "ui basic segment"]
-        [ myForm model
-        , myTable (model.licenses)
+        [ tab model.tab
+        , regTab model
+        , licenseTab model
         ]
