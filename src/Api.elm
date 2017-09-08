@@ -2,8 +2,9 @@ module Api exposing (..)
 
 import Model exposing (..)
 import Json.Encode as Encode 
-import Json.Decode as Json exposing (string, list, int, map4, map, field)
+import Json.Decode as Json exposing (string, list, int, map4, map, field, dict)
 import Http
+import Dict
 
 host : String
 host = "http://192.168.0.20"
@@ -75,6 +76,13 @@ getAllLicenses =
   in  
     Http.send GetAllLicensesResult 
      (Http.get url decodeLicenses)
+     
+toObject : Dict.Dict comparable String -> List ( comparable, Encode.Value )
+toObject dict = 
+  let 
+    l = dict |> Dict.toList
+  in 
+    l |> List.map (\(k, v) -> (k, Encode.string v))
 
 encodeLicense : License -> Encode.Value
 encodeLicense license =
@@ -84,6 +92,7 @@ encodeLicense license =
   , ("available", Encode.int license.available)
   , ("validFrom", Encode.string license.validFrom)
   , ("goodThrough", Encode.string license.goodThrough)
+  , ("properties", Encode.object (toObject license.properties) )  
   ]
   |> Encode.object
 
@@ -96,7 +105,7 @@ encodeDeregister license =
 
 decodeLicense : Json.Decoder License
 decodeLicense = 
-  Json.map7 License
+  Json.map8 License
     (field "id" int)
     (field "productName" string)
     (field "companyName" string)
@@ -104,6 +113,7 @@ decodeLicense =
     (field "available" int)
     (field "validFrom" string)
     (field "goodThrough" string)
+    (field "properties" (dict string))
 
 decodeLicenses : Json.Decoder  (List License)
 decodeLicenses =
@@ -122,4 +132,3 @@ decodeReg =
 decodeRegs : Json.Decoder  (List Registration)
 decodeRegs =
   Json.list decodeReg
-

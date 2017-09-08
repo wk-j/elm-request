@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Http
+import Dict
 
 type Tab = LicenseTab | RegistrationTab
 
@@ -21,6 +22,8 @@ type Msg
   | EditValidFrom String
   | EditGoodThrough String
   | ChangeTab (Tab)
+  | SelectLicense License
+  | EditPropertyValue String String
 
 type alias Registration = 
   { id: Int
@@ -38,4 +41,5 @@ type alias License =
   , available: Int
   , validFrom: String
   , goodThrough: String
+  , properties: (Dict.Dict String String)
   }

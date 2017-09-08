@@ -4,6 +4,7 @@ import Html.Events exposing (..)
 import Model exposing (..)
 import Api exposing (..)
 import Debug
+import Dict
 
 main : Program Never Model Msg
 main =
@@ -15,7 +16,6 @@ main =
         }
 
 -- MODEL
-
 
 type alias Model = 
   { licenses : List License 
@@ -40,7 +40,7 @@ subscriptions model =
 
 emptyLicense : License
 emptyLicense = 
-  License 0 "" "" "" 2 "2016/10/10" "2018/10/10"
+  License 0 "" "" "" 2 "2016/10/10" "2018/10/10" (Dict.fromList [("P1", ""), ("P2", "")])
   -- { id = 0, companyName = "", productName = "", available = 0, validFrom = "2016/10/10", goodThrough = "2018/10/10" }
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -146,6 +146,20 @@ update msg model =
         { model | currentLicense = new }
         ! [Cmd.none]
 
+    SelectLicense license ->
+      { model | currentLicense = license }
+      ! [Cmd.none]
+
+    EditPropertyValue key value ->
+      let
+        current = model.currentLicense
+        property = current.properties
+        newProperty = Dict.insert key value property
+        newCurrent = { current | properties = newProperty }
+      in
+        { model | currentLicense = newCurrent }
+        ! [Cmd.none]
+
 toInt : String -> Int
 toInt input  =
   String.toInt input |> Result.toMaybe |> Maybe.withDefault 0
@@ -160,7 +174,32 @@ disable license =
   else
     "disabled"
 
-myForm : { a | currentLicense : License } -> Html Msg
+myProperty : ( String, String ) -> Html Msg
+myProperty (key, v) = 
+  div [ class "inline fields" ]
+      [ div [ class "three wide field" ]
+        [ label [] [ text "Property" ]
+        , input [ type_ "text", placeholder "Key", value key]
+          []
+        ]
+      , div [ class "three wide field" ]
+        [ input [ type_ "text", placeholder "Value", value v, onInput (EditPropertyValue key)]
+          []
+        ]
+      ]
+
+myProperties:  (Dict.Dict String String) -> Html Msg
+myProperties properties = 
+  if Dict.size properties > 0 then
+    div [ class "ui mini form segment" ]
+      ( 
+        properties 
+        |> Dict.toList
+        |> List.map myProperty)
+  else
+    div [] []
+
+myForm : Model -> Html Msg
 myForm model =
   div [ class "ui small form segment" ]
     [ div [ class "five fields" ]
@@ -185,13 +224,14 @@ myForm model =
         , input [ type_ "number", value <| toString model.currentLicense.available, onInput EditAvailable] []
         ]
       ]
+    , myProperties model.currentLicense.properties
     , div [ class ("ui blue submit button " ++ disable model.currentLicense),  onClick <| UpdateLicenseRequest (model.currentLicense) ]
       [ text "Create" ]
     ]
 
 myRow : License -> Html Msg
 myRow license =
-    tr []
+    tr [onClick (SelectLicense license)]
     [ td [] [ text (toString license.id) ]
     , td [] [ text license.productName ]
     , td [] [ text license.companyName ]
@@ -207,7 +247,7 @@ myRow license =
 
 myTable : List License -> Html Msg
 myTable licenses = 
-  table [ class "ui orange single line table" ]
+  table [ class "ui orange single line selectable table" ]
     [ thead []
       [ tr []
         [ th [] [ text "#" ]
