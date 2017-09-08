@@ -8,11 +8,23 @@ import Http
 host : String
 host = "http://192.168.0.20"
 
-type Msg 
-  = GetAllLicenseRequest
-  | UpdateLicenseRequest (License)
-  | UpdateLicenseResult (Result Http.Error License)
-  | GetAllLicensesResult (Result Http.Error (List License))
+
+deleteLicense : License -> Cmd Msg
+deleteLicense license =
+  let 
+    url = host ++ "/api/license/deleteLicense?token=5b91d36c-f26c-4d15-aeab-5e56f0df15e6"
+  in
+    Http.send
+      DeleteLicenseResult
+      (Http.request 
+        { method = "POST"
+        , headers = [(Http.header "Content-Type" "application/json")]
+        , url = url
+        , body = encodeLicense license |> Http.jsonBody
+        , expect = Http.expectString
+        , timeout = Nothing
+        , withCredentials = False
+         })
 
 updateLicense : License -> Cmd Msg
 updateLicense license =
@@ -41,7 +53,13 @@ getAllLicenses =
 
 encodeLicense : License -> Encode.Value
 encodeLicense license =
-  [("id", Encode.int license.id)]
+  [ ("id", Encode.int license.id)
+  , ("productName", Encode.string license.productName)
+  , ("companyName", Encode.string license.companyName)
+  , ("available", Encode.int license.available)
+  , ("validFrom", Encode.string license.validFrom)
+  , ("goodThrough", Encode.string license.goodThrough)
+  ]
   |> Encode.object
 
 decodeLicense : Json.Decoder License
