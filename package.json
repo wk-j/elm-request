@@ -1,0 +1,29 @@
+{
+  "name": "elm-request",
+  "version": "1.0.0",
+  "description": "```bash # create project elm-package install elm-lang/http",
+  "main": "webpack.config.js",
+  "dependencies": {},
+  "devDependencies": {
+    "copy-webpack-plugin": "^4.0.1",
+    "css-loader": "^0.28.7",
+    "elm-webpack-loader": "^4.3.1",
+    "file-loader": "^0.11.2",
+    "semantic-ui-css": "^2.2.12",
+    "source-map-loader": "^0.2.1",
+    "style-loader": "^0.18.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wk-j/elm-request.git"
+  },
+  "author": "wk <somnuk.wk@gmail.com> (https://github.com/wk-j)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wk-j/elm-request/issues"
+  },
+  "homepage": "https://github.com/wk-j/elm-request#readme"
+}
