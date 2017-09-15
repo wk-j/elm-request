@@ -24,6 +24,7 @@ type Msg
   | ChangeTab (Tab)
   | SelectLicense License
   | EditPropertyValue String String
+  | EditPropertyKey String String
 
 type alias Registration = 
   { id: Int

@@ -41,7 +41,6 @@ subscriptions model =
 emptyLicense : License
 emptyLicense = 
   License 0 "" "" "" 2 "2016/10/10" "2018/10/10" (Dict.fromList [("P1", ""), ("P2", "")])
-  -- { id = 0, companyName = "", productName = "", available = 0, validFrom = "2016/10/10", goodThrough = "2018/10/10" }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
@@ -159,6 +158,10 @@ update msg model =
       in
         { model | currentLicense = newCurrent }
         ! [Cmd.none]
+
+    EditPropertyKey value key ->
+      model
+      ! [Cmd.none]
 
 toInt : String -> Int
 toInt input  =
