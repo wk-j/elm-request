@@ -5,12 +5,17 @@
 elm-package install elm-lang/http
 
 # build
-elm-make src/Index.elm --output=dist/main.js
-
-cp src/Index.html dist
+# elm-make src/Main.elm --output=dist/main.js
 
 # watch
-watchman-make -p 'src/*.elm' --make='elm-make src/Main.elm --output=dist/main.js' -t ""
+# watchman-make -p 'src/*.elm' --make='elm-make src/Main.elm --output=dist/main.js' -t ""
 
-elm-reactor
+# reactor
+#elm-reactor
+
+# copy html
+cp src/Index.html dist
+
+# build with webpack
+webpack --watch
 ```

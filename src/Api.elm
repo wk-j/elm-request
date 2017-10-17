@@ -7,8 +7,8 @@ import Http
 import Dict
 
 host : String
--- host = "http://192.168.0.20"
-host = "http://localhost:20000"
+host = "http://192.168.0.20"
+-- host = "http://localhost:20000"
 
 deleteLicense : License -> Cmd Msg
 deleteLicense license =
